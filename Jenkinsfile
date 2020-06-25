@@ -27,7 +27,7 @@ pipeline {
     stage('Scan') {
       steps {
         container ('nodejs') {
-          synopsys_detect(detectProperties: '--blackduck.url="https://bizdevhub.blackducksoftware.com"  --blackduck.api.token="${BLACKDUCK_ACCESS_TOKEN}"  --detect.tools="DETECTOR"', returnStatus: true)
+          synopsys_detect(detectProperties: '--blackduck.url="https://bizdevhub.blackducksoftware.com"  --blackduck.api.token="${BLACKDUCK_ACCESS_TOKEN}"  --detect.tools="SIGNATURE_SCAN"', returnStatus: true)
         }
       }
     }
