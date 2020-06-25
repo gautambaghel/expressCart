@@ -10,7 +10,7 @@ pipeline {
     stage('Build') {
       steps {
         container ('nodejs') {
-          sh 'mvn clean package'
+          sh 'npm install'
         }
 
       }
@@ -18,7 +18,7 @@ pipeline {
     stage ('Deploy to Testing Environment') {
       steps {
         container ('nodejs') {
-          echo "deploy target/*.war to testing environment"
+          echo "deploy nodejs module to testing environment"
         }
       }
     }
