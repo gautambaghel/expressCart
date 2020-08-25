@@ -78,7 +78,7 @@
     <body>
     {{/if}}
 		<!-- Static navbar -->
-	    <nav class="navbar navbar-default navbar-static-top">
+	    <nav class="pageheader navbar navbar-default navbar-static-top">
 			<div class="container-fluid mainNavBar">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed offcanvas-trigger" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -90,14 +90,13 @@
                     {{#if admin}}
                         <a class="navbar-brand navbar-brand-image" href="/admin"><img class="img-responsive" src="/images/logo-admin.png"></a>
                     {{else}}
-                        {{#isNull @root.config.cartLogo}}
-                            {{#isNull @root.config.cartTitle}}
-                                <a class="navbar-brand" href="/">expressCart</a>
-                            {{else}}
-                                <a class="navbar-brand" href="/">{{@root.config.cartTitle}}</a>
-                            {{/isNull}}
-                        {{else}}
+                        {{#if @root.config.cartLogo}}
                             <a class="navbar-brand navbar-brand-image" href="/"><img class="img-responsive" src="{{@root.config.cartLogo}}"></a>
+                        {{/if}}
+                        {{#isNull @root.config.cartTitle}}
+                            <a class="navbar-brand" href="/">expressCart</a>
+                        {{else}}
+                            <a class="navbar-brand" href="/">{{@root.config.cartTitle}}</a>
                         {{/isNull}}
                     {{/if}}
 				</div>
@@ -108,7 +107,7 @@
                         {{#ifCond page '!=' 'pay'}}
                             {{#if @root.session.cart}}
                                 <li><a href="/cart" class="menu-btn"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Cart <span class="badge" id="cart-count">{{@root.session.cartTotalItems}}</span></a></li>
-                                {{else}}
+                            {{else}}
                                 <li><a href="/cart" class="menu-btn"><i class="fa fa-shopping-cart" aria-hidden="true"></i> Cart <span class="badge" id="cart-count">0</span></a></li>
                             {{/if}}
                         {{/ifCond}}

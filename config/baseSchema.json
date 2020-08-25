@@ -14,7 +14,7 @@
         "baseUrl": {
             "type": "string",
             "format": "uri-template",
-            "default": "http://localhost:1111"
+            "default": "http://localhost:8080"
         },
         "emailHost": {
             "format": "uri-template",

@@ -4,22 +4,14 @@ install:
   coverity:
     version: latest
 project:
-  name: ${scm.git.repo}
+  name: "SIG Employee Store - SSDC"
   branch: ${scm.git.branch}
   revision:
     name: ${scm.git.commit}
     date: ${scm.git.commit.date}
-#capture:
-#  coverity:
-#    buildless:
-#      project:
-#        languages:
-#          - "javascript"
-#        excludes:
-#          - ./node_modules/*
 capture:
   fileSystem:
     javascript:
       files:
       - directory: ${project.projectDir}
-      - excludeRegex: "/node_modules/"
+      - excludeRegex: node_modules
