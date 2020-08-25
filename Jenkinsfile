@@ -36,8 +36,10 @@ pipeline {
         stage('Code Analysis') {           
             steps {
               //put your code scanner 
+              container('maven') {
                 echo 'Code Scanning and Analysis'
                 sh 'mvn --version'
+              }
             }
         }
   
