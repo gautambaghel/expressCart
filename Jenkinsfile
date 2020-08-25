@@ -46,9 +46,9 @@ pipeline {
         }
   
         stage('Automated Testing') {
-            container('maven') {
-              steps {
-                  //put your Testing
+            steps {
+              //put your Testing
+              container('maven') {
                   echo 'Robot Testing Start'
                   sh 'mvn test'
               }
@@ -64,8 +64,8 @@ pipeline {
         }
 
         stage('Open Source Composition Scan') {
-              container('maven') {
-                steps {
+              steps {
+                container('maven') {
                     //Put your image scanning tool 
                     echo 'Image Scanning Start'
                     sh 'wget https://detect.synopsys.com/detect.sh'
