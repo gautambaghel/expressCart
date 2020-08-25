@@ -54,7 +54,7 @@ pipeline {
 
         stage("Deploy to Production"){
                 when {
-                    branch 'master'
+                    branch 'cloudbees-ci'
                 }
                 steps { 
                     kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
