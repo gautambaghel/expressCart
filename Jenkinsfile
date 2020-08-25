@@ -1,11 +1,11 @@
-podTemplate(label: 'kubernetes',
-      containers: [
-        containerTemplate(name: 'maven', image: 'maven:3.5.2-jdk-8-alpine', ttyEnabled: true, command: 'cat')
-      ]) {
-
 pipeline {
   
-    agent none
+    agent {
+      kubernetes {
+        label 'maven-app'
+      }
+    }
+
     environment {
         //put your own environment variables
         REGISTRY_URI = "docker.io/gautambaghel"
@@ -13,17 +13,11 @@ pipeline {
  
     stages {
 
-      
-
-      node("kubernetes") {
-
         stage('Initial Notification') {
-          container("maven") {
             steps {
                  //put webhook for your notification channel 
                  echo 'Pipeline Start Notification'
             }
-          }
         }
 
         stage('Code Analysis') {           
@@ -97,9 +91,7 @@ pipeline {
                   }
               }
           }
-       }
-      
-    }
+      }
         
     post{
         always{
@@ -117,4 +109,3 @@ pipeline {
         }
     }
 }
-      }
