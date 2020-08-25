@@ -1,5 +1,6 @@
 pipeline {
- 
+  
+    agent none
     environment {
         //put your own environment variables
         REGISTRY_URI = "docker.io/gautambaghel"
