@@ -3,6 +3,18 @@ pipeline {
     agent {
       kubernetes {
         label 'maven-app'
+        defaultContainer 'jnlp'
+        yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: maven
+                image: maven:3.3.9-jdk-8-alpine
+                command:
+                - cat
+                tty: true
+            """
       }
     }
 
@@ -16,6 +28,7 @@ pipeline {
         stage('Initial Notification') {
             steps {
                  //put webhook for your notification channel 
+                 sh 'ls'
                  echo 'Pipeline Start Notification'
             }
         }
@@ -74,7 +87,7 @@ pipeline {
                   }
               }
           }
-          
+
         stage("Deploy to Production"){
                 when {
                     branch 'cloudbees-ci'
