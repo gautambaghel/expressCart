@@ -37,91 +37,57 @@ pipeline {
             }
         }
 
-        stage("Build"){
-            steps {
-              steps {withCredentials([usernamePassword(credentialsId: 'YOUR_ID_DEFINED', passwordVariable: 'YOUR_PW_DEFINED', usernameVariable: 'YOUR_ACCOUNT_DEFINED')]) {
-                          sh """
-                          docker login ${REGISTRY_URI} -u ${YOUR_ACCOUNT_DEFINED} -p ${YOUR_PW_DEFINED}
-                              """
-                          echo "Docker Build"
-                          sh """
-                                          docker build -t ${IMAGE_NAME}:${VERSION_PREFIX}${BUILD_NUMBER} ${WORKSPACE} -f Dockerfile
-                                          """
-                          echo "Docker Tag"
-                          sh """
-                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
-                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
-                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                             """
-                        
-                        echo "Docker Push"
-                          sh """
-                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
-                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
-                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                            """
+        stage('Image Scan') {
+                steps {
+                    //Put your image scanning tool 
+                    echo 'Image Scanning Start'
+                }
+                post{
+                    success{
+                        echo "Image Scanning Successfully"
+                    }
+                    failure{
+                        echo "Image Scanning Failed"
+                    }
+                }
+            }
+
+        stage("Deploy to Production"){
+                when {
+                    branch 'master'
+                }
+                steps { 
+                    kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
+    
+                }
+                post{
+                    success{
+                        echo "Successfully deployed to Production"
+                    }
+                    failure{
+                        echo "Failed deploying to Production"
+                    }
+                }
+            }
+
+        stage("Deploy to Staging"){
+              when {
+                  branch 'staging'
+              }
+              steps {
+                  kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
+              }
+              post{
+                  success{
+                      echo "Successfully deployed to Staging"
+                  }
+                  failure{
+                      echo "Failed deploying to Staging"
+                  }
+              }
+          }
+      }
         
-                    }
-                    post{
-                        success{
-                            echo "Build and Push Successfully"
-                        }
-                        failure{
-                            echo "Build and Push Failed"
-                        }
-                    }
-                }
-            }
-        }
-stage('Image Scan') {
-            steps {
-                //Put your image scanning tool 
-                echo 'Image Scanning Start'
-            }
-            post{
-                success{
-                    echo "Image Scanning Successfully"
-                }
-                failure{
-                    echo "Image Scanning Failed"
-                }
-            }
-        }
-stage("Deploy to Production"){
-            when {
-                branch 'master'
-            }
-            steps { 
-                kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
- 
-             }
-            post{
-                success{
-                    echo "Successfully deployed to Production"
-                }
-                failure{
-                    echo "Failed deploying to Production"
-                }
-            }
-        }
-stage("Deploy to Staging"){
-            when {
-                branch 'staging'
-            }
-            steps {
-                kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
-             }
-            post{
-                success{
-                    echo "Successfully deployed to Staging"
-                }
-                failure{
-                    echo "Failed deploying to Staging"
-                }
-            }
-        }
-  }
- 
     post{
         always{
     step([
