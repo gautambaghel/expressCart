@@ -21,6 +21,8 @@ pipeline {
     environment {
         //put your own environment variables
         REGISTRY_URI = "docker.io/gautambaghel"
+        BLACKDUCK_ACCESS_TOKEN  = credentials('jenkins-blackduck-access-token')
+        POLARIS_ACCESS_TOKEN = credentials('jenkins-polaris-access-token')
     }
  
     stages {
@@ -33,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Code Analysis') {           
+        stage('Static Code Analysis') {           
             steps {
               //put your code scanner 
               container('maven') {
@@ -43,34 +45,48 @@ pipeline {
             }
         }
   
-        stage('Robot Testing') {
-            steps {
-                //put your Testing
-                echo 'Robot Testing Start'
+        stage('Automated Testing') {
+            container('maven') {
+              steps {
+                  //put your Testing
+                  echo 'Robot Testing Start'
+                  sh 'mvn test'
+              }
             }
             post{
                 success{
-                    echo "Robot Testing Successfully"
+                    echo "Automated Testing Successfully"
                 }
                 failure{
-                    echo "Robot Testing Failed"
+                    echo "Automated Testing Failed"
                 }
             }
         }
 
-        stage('Image Scan') {
+        stage('Open Source Composition Scan') {
+              container('maven') {
                 steps {
                     //Put your image scanning tool 
                     echo 'Image Scanning Start'
+                    sh 'wget https://detect.synopsys.com/detect.sh'
+                    sh 'chmod +x detect.sh'
+                    sh './detect.sh \
+                        --blackduck.url="https://bizdevhub.blackducksoftware.com" \
+                        --blackduck.api.token="${BLACKDUCK_ACCESS_TOKEN}" \
+                        --blackduck.trust.cert=true \
+                        --detect.project.name="CloudBeesDucky" \
+                        --detect.tools="DETECTOR" \
+                        --detect.project.version.name="DETECTOR_${BUILD_TAG}"'
                 }
                 post{
                     success{
-                        echo "Image Scanning Successfully"
+                        echo "Composition Scanning Successfully"
                     }
                     failure{
-                        echo "Image Scanning Failed"
+                        echo "Composition Scanning Failed"
                     }
                 }
+              }
             }
 
         stage("Deploy to Staging"){
