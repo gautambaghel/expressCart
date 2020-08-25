@@ -1,25 +1,26 @@
 pipeline {
  
     environment {
-        
         //put your own environment variables
         REGISTRY_URI = "docker.io/gautambaghel"
-}
+    }
  
     stages {
+
         stage('Initial Notification') {
             steps {
                  //put webhook for your notification channel 
                  echo 'Pipeline Start Notification'
             }
         }
-stage('Code Analysis') {           
+
+        stage('Code Analysis') {           
             steps {
-               //put your code scanner 
+              //put your code scanner 
                 echo 'Code Scanning and Analysis'
             }
         }
- 
+  
         stage('Robot Testing') {
             steps {
                 //put your Testing
@@ -34,40 +35,42 @@ stage('Code Analysis') {
                 }
             }
         }
-stage("Build"){
+
+        stage("Build"){
             steps {
-steps {withCredentials([usernamePassword(credentialsId: 'YOUR_ID_DEFINED', passwordVariable: 'YOUR_PW_DEFINED', usernameVariable: 'YOUR_ACCOUNT_DEFINED')]) {
-                    sh """
-                    docker login ${REGISTRY_URI} -u ${YOUR_ACCOUNT_DEFINED} -p ${YOUR_PW_DEFINED}
-                    """
+              steps {withCredentials([usernamePassword(credentialsId: 'YOUR_ID_DEFINED', passwordVariable: 'YOUR_PW_DEFINED', usernameVariable: 'YOUR_ACCOUNT_DEFINED')]) {
+                            sh """
+                            docker login ${REGISTRY_URI} -u ${YOUR_ACCOUNT_DEFINED} -p ${YOUR_PW_DEFINED}
+                            """
+                        }
+        echo "Docker Build"
+        sh """
+                        docker build -t ${IMAGE_NAME}:${VERSION_PREFIX}${BUILD_NUMBER} ${WORKSPACE} -f Dockerfile
+                        """
+        echo "Docker Tag"
+        sh """
+                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
+                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
+                            docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
+                        """
+                        
+                        echo "Docker Push"
+        sh """
+                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
+                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
+                            docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
+                        """
+        
+                    }
+                    post{
+                        success{
+                            echo "Build and Push Successfully"
+                        }
+                        failure{
+                            echo "Build and Push Failed"
+                        }
+                    }
                 }
-echo "Docker Build"
-sh """
-                docker build -t ${IMAGE_NAME}:${VERSION_PREFIX}${BUILD_NUMBER} ${WORKSPACE} -f Dockerfile
-                """
-echo "Docker Tag"
-sh """
-                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
-                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
-                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                """
-                
-                echo "Docker Push"
-sh """
-                    docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
-                    docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
-                    docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                """
- 
-            }
-            post{
-                success{
-                    echo "Build and Push Successfully"
-                }
-                failure{
-                    echo "Build and Push Failed"
-                }
-            }
         }
 stage('Image Scan') {
             steps {
