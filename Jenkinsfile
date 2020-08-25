@@ -40,27 +40,26 @@ pipeline {
         stage("Build"){
             steps {
               steps {withCredentials([usernamePassword(credentialsId: 'YOUR_ID_DEFINED', passwordVariable: 'YOUR_PW_DEFINED', usernameVariable: 'YOUR_ACCOUNT_DEFINED')]) {
-                            sh """
-                            docker login ${REGISTRY_URI} -u ${YOUR_ACCOUNT_DEFINED} -p ${YOUR_PW_DEFINED}
-                            """
-                        }
-        echo "Docker Build"
-        sh """
-                        docker build -t ${IMAGE_NAME}:${VERSION_PREFIX}${BUILD_NUMBER} ${WORKSPACE} -f Dockerfile
-                        """
-        echo "Docker Tag"
-        sh """
+                          sh """
+                          docker login ${REGISTRY_URI} -u ${YOUR_ACCOUNT_DEFINED} -p ${YOUR_PW_DEFINED}
+                              """
+                          echo "Docker Build"
+                          sh """
+                                          docker build -t ${IMAGE_NAME}:${VERSION_PREFIX}${BUILD_NUMBER} ${WORKSPACE} -f Dockerfile
+                                          """
+                          echo "Docker Tag"
+                          sh """
                             docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
                             docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
                             docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                        """
+                             """
                         
                         echo "Docker Push"
-        sh """
+                          sh """
                             docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${GIT_COMMIT}
                             docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${BUILD_NUMBER}
                             docker push ${REGISTRY_URI}/${REGISTRY_NAME}/${IMAGE_NAME}:${GIT_BRANCH}-${LATEST}
-                        """
+                            """
         
                     }
                     post{
@@ -72,6 +71,7 @@ pipeline {
                         }
                     }
                 }
+            }
         }
 stage('Image Scan') {
             steps {
@@ -120,21 +120,21 @@ stage("Deploy to Staging"){
                 }
             }
         }
-}
+  }
  
     post{
         always{
-step([
+    step([
              //put your Testing
             ])
         }
         success{
             //notification webhook
             echo 'Pipeline Execution Successfully Notification'
-}
+        }
         failure{
             //notification webhook
             echo 'Pipeline Execution Failed Notification'
-}
+        }
     }
 }
