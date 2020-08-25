@@ -8,11 +8,20 @@ pipeline {
  
     stages {
 
+      podTemplate(label: 'kubernetes',
+      containers: [
+        containerTemplate(name: 'maven', image: 'maven:3.5.2-jdk-8-alpine', ttyEnabled: true, command: 'cat')
+      ]) {
+
+      node("kubernetes") {
+
         stage('Initial Notification') {
+          container("maven") {
             steps {
                  //put webhook for your notification channel 
                  echo 'Pipeline Start Notification'
             }
+          }
         }
 
         stage('Code Analysis') {           
@@ -86,7 +95,9 @@ pipeline {
                   }
               }
           }
+       }
       }
+    }
         
     post{
         always{
