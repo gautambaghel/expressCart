@@ -24,6 +24,7 @@ pipeline {
             steps {
               //put your code scanner 
                 echo 'Code Scanning and Analysis'
+                sh 'mvn --version'
             }
         }
   
@@ -57,24 +58,6 @@ pipeline {
                 }
             }
 
-        stage("Deploy to Production"){
-                when {
-                    branch 'cloudbees-ci'
-                }
-                steps { 
-                    kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
-    
-                }
-                post{
-                    success{
-                        echo "Successfully deployed to Production"
-                    }
-                    failure{
-                        echo "Failed deploying to Production"
-                    }
-                }
-            }
-
         stage("Deploy to Staging"){
               when {
                   branch 'staging'
@@ -91,6 +74,25 @@ pipeline {
                   }
               }
           }
+          
+        stage("Deploy to Production"){
+                when {
+                    branch 'cloudbees-ci'
+                }
+                steps { 
+                    // kubernetesDeploy kubeconfigId: 'kubeconfig-credentials-id', configs: 'build-pod.yaml', enableConfigSubstitution: true  // REPLACE kubeconfigId
+                    docker ps
+                }
+                post{
+                    success{
+                        echo "Successfully deployed to Production"
+                    }
+                    failure{
+                        echo "Failed deploying to Production"
+                    }
+                }
+            }
+
       }
         
     post{
